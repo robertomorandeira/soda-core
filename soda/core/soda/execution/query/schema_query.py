@@ -32,5 +32,6 @@ class TableColumnsQuery(Query):
         Propagates self.rows to the metric value being a dict with name and type as keys
         """
         if len(self.rows) > 0:
-            measured_schema = [{"name": row[0], "type": row[1]} for row in self.rows]
+            columns = self.data_source_scan.data_source.get_table_columns(self.table.table_name, self.query_name)
+            measured_schema = [{"name": col_name, "type": dtype} for col_name, dtype in columns.items()]
             self.metric.set_value(measured_schema)

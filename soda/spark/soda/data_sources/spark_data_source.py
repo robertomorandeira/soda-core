@@ -209,7 +209,7 @@ class SparkSQLBase(DataSource):
         if len(query.rows) > 0:
             rows = query.rows
             # Remove the partitioning information (see https://spark.apache.org/docs/latest/sql-ref-syntax-aux-describe-table.html)
-            partition_indices = [i for i in range(len(rows)) if rows[i][0].startswith("# Partition")]
+            partition_indices = [i for i in range(len(rows)) if rows[i][1] is None]
             if partition_indices:
                 rows = rows[: partition_indices[0]]
             columns = {row[0]: row[1] for row in rows}
@@ -269,7 +269,7 @@ class SparkSQLBase(DataSource):
             data_source_scan=self.data_source_scan, unqualified_query_name=query_name or "get_table_names", sql=sql
         )
         query.execute()
-        table_names = [row[1] for row in query.rows]
+        table_names = [row[1] if len(row) > 1 else row[0] for row in query.rows]
         table_names = self._filter_include_exclude(table_names, include_tables, exclude_tables)
         return table_names
 
@@ -295,7 +295,7 @@ class SparkSQLBase(DataSource):
             sql=self.sql_find_table_names(),
         )
         query.execute()
-        table_names = [row[1] for row in query.rows]
+        table_names = [row[1] if len(row) > 1 else row[0] for row in query.rows]
 
         included_table_names = [
             table_name
@@ -350,7 +350,7 @@ class SparkSQLBase(DataSource):
             columns_metadata = query.rows
 
             partition_indices = [
-                i for i in range(len(columns_metadata)) if columns_metadata[i][0].startswith("# Partition")
+                i for i in range(len(columns_metadata)) if columns_metadata[i][1] is None
             ]
             if partition_indices:
                 columns_metadata = columns_metadata[: partition_indices[0]]
