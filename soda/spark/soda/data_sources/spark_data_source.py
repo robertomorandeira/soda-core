@@ -426,6 +426,8 @@ class SparkSQLBase(DataSource):
     def safe_connection_data(self):
         """TODO: implement for spark."""
 
+    def sql_union(self):
+        return "UNION ALL"
 
 class SparkDataSource(SparkSQLBase):
     TYPE = "spark"
